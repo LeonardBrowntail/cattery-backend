@@ -41,8 +41,12 @@ class AuthController extends Controller
             return $this->loginFailedAuthenticationResponse();
         }
 
-        $token = $user->createToken('auth-token')->plainTextToken;
-        return $this->loginSuccessResponse($token, $user);
+        if ($user->isAdmin()) {
+            $token = $user->createToken('auth-token')->plainTextToken;
+        } else {
+            $token = $user->createToken('auth-token', ['user.view', 'user.update', 'cat.viewAny', 'cat.view', 'basket.create', 'basket.update', 'basket.delete', 'order.create']);
+        }
+        return $this->loginSuccessResponse($token, $user->toResource());
     }
 
     public function logout(Request $request) {

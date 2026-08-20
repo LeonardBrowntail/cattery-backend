@@ -6,7 +6,7 @@ use App\Http\ApiTraits\ExposeValidatorOnFail;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     use ExposeValidatorOnFail;
     /**
@@ -14,7 +14,7 @@ class LoginRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('update');
     }
 
     /**
@@ -25,10 +25,9 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string']
+            'name' => ['sometimes', 'string', 'max:64'],
+            'password' => ['sometimes', 'string','min:8', 'confirmed'],
+            'phone' => ['sometimes','string','max:16']
         ];
     }
-
-    
 }

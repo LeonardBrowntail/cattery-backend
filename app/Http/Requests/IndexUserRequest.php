@@ -2,19 +2,17 @@
 
 namespace App\Http\Requests;
 
-use App\Http\ApiTraits\ExposeValidatorOnFail;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class IndexUserRequest extends FormRequest
 {
-    use ExposeValidatorOnFail;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->can('viewAny');
     }
 
     /**
@@ -25,10 +23,15 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string']
+            //
         ];
     }
 
-    
+    public function search() {
+        return $this->query('search');
+    }
+
+    public function perPage() {
+        return $this->integer('per_page', 10);
+    }
 }

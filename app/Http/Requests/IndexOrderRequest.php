@@ -2,19 +2,18 @@
 
 namespace App\Http\Requests;
 
-use App\Http\ApiTraits\ExposeValidatorOnFail;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class IndexOrderRequest extends FormRequest
 {
-    use ExposeValidatorOnFail;
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()->isAdmin();
     }
 
     /**
@@ -25,10 +24,15 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string'],
-            'password' => ['required', 'string']
+            //
         ];
     }
 
-    
+    public function search() {
+        return $this->query('search');
+    }
+
+    public function status() {
+        return $this->query('status');
+    }
 }
