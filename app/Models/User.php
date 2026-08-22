@@ -18,10 +18,32 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $username
  * @property string $email
  * @property string $password
- * @property string $phone
- * @property boolean $is_admin
- * @property Carbon|null $created_at
- * @property Carbon|null $deleted_at
+ * @property string|null $phone
+ * @property int $is_admin
+ * @property \Carbon\CarbonImmutable|null $created_at
+ * @property \Carbon\CarbonImmutable|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Basket> $baskets
+ * @property-read int|null $baskets_count
+ * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read int|null $notifications_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Order> $orders
+ * @property-read int|null $orders_count
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \Laravel\Sanctum\PersonalAccessToken> $tokens
+ * @property-read int|null $tokens_count
+ * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
+ * @method static Builder<static>|User newModelQuery()
+ * @method static Builder<static>|User newQuery()
+ * @method static Builder<static>|User query()
+ * @method static Builder<static>|User search(?string $keyword)
+ * @method static Builder<static>|User whereCreatedAt($value)
+ * @method static Builder<static>|User whereEmail($value)
+ * @method static Builder<static>|User whereId($value)
+ * @method static Builder<static>|User whereIsAdmin($value)
+ * @method static Builder<static>|User wherePassword($value)
+ * @method static Builder<static>|User wherePhone($value)
+ * @method static Builder<static>|User whereUpdatedAt($value)
+ * @method static Builder<static>|User whereUsername($value)
+ * @mixin \Eloquent
  */
 #[UsePolicy(UserPolicy::class)]
 #[UseResource(UserResource::class)]

@@ -15,11 +15,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'username' => 'root',
-            'email' => 'admin@miracattery.com',
-            'password' => 'adminPass098',
-            'phone' => "08129"
-        ]);
+        // User::factory()->create([
+        //     'username' => 'root',
+        //     'email' => 'admin@miracattery.com',
+        //     'password' => 'adminPass098',
+        //     'phone' => "08129"
+        // ]);
     }
 }

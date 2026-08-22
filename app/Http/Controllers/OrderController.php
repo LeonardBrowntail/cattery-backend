@@ -11,7 +11,7 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(IndexOrderRequest $request)
+    public function index(IndexOrderRequest $request )
     {
         
     }

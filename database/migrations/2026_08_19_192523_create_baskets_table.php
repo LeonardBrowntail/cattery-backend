@@ -1,5 +1,6 @@
 <?php
 
+use Database\Seeders\BasketSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -17,6 +18,9 @@ return new class extends Migration
             $table->foreignId('cat_id')->constrained('cats')->cascadeOnDelete();
             $table->timestamps();
         });
+
+        $seeder = new BasketSeeder;
+        $seeder->run();
     }
 
     /**

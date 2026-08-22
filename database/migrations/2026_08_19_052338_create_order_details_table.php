@@ -1,5 +1,6 @@
 <?php
 
+use Database\Seeders\OrderDetailsSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,6 +19,9 @@ return new class extends Migration
             $table->decimal('price');
             $table->timestamps();
         });
+
+        $seeder = new OrderDetailsSeeder;
+        $seeder->run();
     }
 
     /**
