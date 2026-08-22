@@ -23,7 +23,14 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
-        $user_id = User::all()->random()->id;
+        $orderCount = Order::count();
+        if ($orderCount < 1) {
+            $user_id = User::all()->random()->id;
+        } else {
+            $ids = Order::get(['user_id']);
+            $user_id = User::whereNotIn('id',$ids);
+        }
+        $user_id = User::all()->random();
         $province = Province::all()->random();
         $regency = Regency::where('province_id', $province->id)->get()->random();
         $district = District::where('regency_id', $regency->id)->get()->random();

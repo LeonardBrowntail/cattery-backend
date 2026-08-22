@@ -33,7 +33,7 @@ class CatFactory extends Factory
             ]),
             'birthdate' => $this->faker->dateTimeBetween('-5 years', 'now')->format('Y-m-d'),
             'weight' => $this->faker->randomFloat(2, 2.5, 8.0), // weight in kg
-            'price' => $this->faker->numberBetween(500, 15000) * 1000,
+            'price' => $this->faker->numberBetween(100, 999) * 100000,
             'description' => $this->faker->text(128),
             'status' => $this->faker->randomElement(['available', 'reserved', 'sold']),
         ];

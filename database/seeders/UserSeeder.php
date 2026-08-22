@@ -9,21 +9,11 @@ use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        User::create([
-            'username' => 'admin',
-            'email' => 'admin@miracattery.com',
-            'password' => Hash::make('adminPassword123'),
-            'is_admin' => true,
-            'phone' => '081295226757',
-        ]);
-
         User::factory()->count(20)->create();
     }
 }

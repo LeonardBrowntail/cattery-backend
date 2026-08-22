@@ -8,13 +8,11 @@ use Illuminate\Database\Seeder;
 
 class BasketSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Basket::factory()->create();
+        Basket::factory()->count(30)->create();
     }
 }

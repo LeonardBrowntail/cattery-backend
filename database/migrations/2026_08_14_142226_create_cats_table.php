@@ -27,9 +27,6 @@ return new class extends Migration
             $table->string('status');
             $table->timestamps();
         });
-
-        $seeder = new CatSeeder;
-        $seeder->run();
     }
 
     /**

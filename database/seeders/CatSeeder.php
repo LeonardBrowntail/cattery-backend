@@ -8,7 +8,6 @@ use Illuminate\Database\Seeder;
 
 class CatSeeder extends Seeder
 {
-    use WithoutModelEvents;
     /**
      * Run the database seeds.
      */
@@ -17,7 +16,7 @@ class CatSeeder extends Seeder
         Cat::factory()->count(10)->create();
 
         Cat::factory()->count(20)->create()->each(function ($cat) {
-            if (rand(1,100) <= 30) {
+            if (rand(1,100) <= 70) {
                 $cat->update([
                     'father_id' => Cat::where('sex', 'male')->where('id', '!=', $cat->id)->inRandomOrder()->first()?->id,
                     'mother_id' => Cat::where('sex', 'female')->where('id', '!=', $cat->id)->inRandomOrder()->first()?->id,

@@ -16,12 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('order_id')->constrained('orders')->cascadeOnDelete();
             $table->foreignId('cat_id')->constrained('cats')->cascadeOnDelete();
-            $table->decimal('price');
+            $table->decimal('price', 12, 2);
             $table->timestamps();
         });
-
-        $seeder = new OrderDetailsSeeder;
-        $seeder->run();
     }
 
     /**

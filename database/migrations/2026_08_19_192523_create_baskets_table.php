@@ -18,9 +18,6 @@ return new class extends Migration
             $table->foreignId('cat_id')->constrained('cats')->cascadeOnDelete();
             $table->timestamps();
         });
-
-        $seeder = new BasketSeeder;
-        $seeder->run();
     }
 
     /**
