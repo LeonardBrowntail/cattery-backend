@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\ApiTraits\OrderAPIResponses;
+use App\Http\Requests\IndexOrderRequest;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller

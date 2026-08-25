@@ -22,9 +22,7 @@ trait ApiResponse
         if ($payload) {
             if ($status) {
                 $json['data'] = $payload;
-                $json['errors'] = null;
             } else {
-                $json['data'] = null;
                 $json['errors'] = $payload;
             }
         }

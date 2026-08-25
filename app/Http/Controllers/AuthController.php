@@ -15,7 +15,7 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request) {
         if (isset($request->validator) && $request->validator->fails()) {
-            return $this->registerFailedValidationResponse($request->validator->errors());
+            return $this->registerInvalidResponse($request->validator->errors());
         }
         $valid = $request->validated();
         $valid['password'] = Hash::make($request->validated('password'));
@@ -25,7 +25,7 @@ class AuthController extends Controller
 
     public function login(LoginRequest $request) {
         if (isset($request->validator) && $request->validator->fails()){
-            return $this->loginFailedValidationResponse($request->validator->errors());
+            return $this->loginInvalidResponse($request->validator->errors());
         }
 
         // check username
@@ -38,13 +38,13 @@ class AuthController extends Controller
         }
         
         if (!$user || !$validPass) {
-            return $this->loginFailedAuthenticationResponse();
+            return $this->loginFailedResponse();
         }
 
         if ($user->isAdmin()) {
             $token = $user->createToken('auth-token')->plainTextToken;
         } else {
-            $token = $user->createToken('auth-token', ['user.view', 'user.update', 'cat.viewAny', 'cat.view', 'basket.create', 'basket.update', 'basket.delete', 'order.create']);
+            $token = $user->createToken('auth-token', ['user.view', 'user.update', 'basket.create', 'basket.update', 'basket.delete', 'order.create'])->plainTextToken;
         }
         return $this->loginSuccessResponse($token, $user->toResource());
     }

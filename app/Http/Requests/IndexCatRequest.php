@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use SortDirection;
 
 class IndexCatRequest extends FormRequest
 {
@@ -25,12 +26,12 @@ class IndexCatRequest extends FormRequest
         return [];
     }
 
-    public function search() {
-        return $this->query('search');
+    public function includeParents() {
+        return $this->exists('includeParents');
     }
 
-    public function breed() {
-        return $this->query('breed');
+    public function search() {
+        return $this->query('search');
     }
 
     public function sex() {
@@ -38,7 +39,27 @@ class IndexCatRequest extends FormRequest
     }
 
     public function status() {
-        return $this->query('status');
+        $str = $this->query('status');
+        if (!$str) return null;
+        return explode(',',$str);
+    }
+
+    public function sort() {
+        $raw = $this->query('sort');
+        if (str_contains($raw, 'price')) {
+            return 'price';
+        }
+        if (str_contains($raw, 'age')) {
+            return 'birthdate';
+        }
+        return 'updated_at';
+    }
+
+    public function sortDir() {
+        if ($this->has('asc')) {
+            return SortDirection::Ascending;
+        }
+        return SortDirection::Descending;
     }
 
     public function minPrice() {

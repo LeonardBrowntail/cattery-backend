@@ -30,7 +30,7 @@ class CatResource extends JsonResource
             'primary_image' => new CatImageResource($this->whenLoaded('primaryImage')),
         ];
 
-        if ($request->user()->isAdmin()) {
+        if ($request->user()?->isAdmin()) {
             $list['created_at'] = $this->created_at;
             $list['updated_at'] = $this->updated_at;
         }

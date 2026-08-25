@@ -8,7 +8,6 @@ use App\Http\Requests\CreateCatRequest;
 use App\Http\Requests\UpdateCatRequest;
 use App\Http\Resources\CatResource;
 use App\Models\Cat;
-use App\Models\CatAudit;
 use App\Models\CatImage;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
@@ -23,17 +22,15 @@ class CatController extends Controller
      */
     public function index(IndexCatRequest $request)
     {
-        $cats = Cat::query()
-            ->with(['primaryImage', 'father', 'mother'])
+            $cats = Cat::query()
+            ->with($request->includeParents() ? ['primaryImage', 'father', 'mother'] : ['primaryImage'])
             ->search($request->search())
-            ->breed($request->breed())
             ->sex($request->sex())
             ->status($request->status())
             ->priceBetween(
                 $request->minPrice() !== null ? (float) $request->minPrice() : null,
                 $request->maxPrice() !== null ? (float) $request->maxPrice() : null
             )
-            ->latest()
             ->paginate($request->perPage())
             ->withQueryString();
         

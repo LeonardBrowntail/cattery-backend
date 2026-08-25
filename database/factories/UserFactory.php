@@ -24,20 +24,22 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'username' => fake()->name(),
+            'username' => fake()->userName(),
             'email' => fake()->unique()->safeEmail(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => static::$password ??= Hash::make(fake()->password(8)),
             'phone' => fake()->phoneNumber(),
+            'is_admin' => false
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Changes the state of is_admin
+     * @param bool $state set to `true` to make `user` admin, `false` otherwise
+     * @return static
      */
-    public function unverified(): static
-    {
+    public function isAdmin(bool $state = true): static {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'is_admin' => $state
         ]);
     }
 }

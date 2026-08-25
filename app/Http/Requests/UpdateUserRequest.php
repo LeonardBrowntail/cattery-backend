@@ -10,14 +10,6 @@ class UpdateUserRequest extends FormRequest
 {
     use ExposeValidatorOnFail;
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return $this->user()->can('update');
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -25,7 +17,7 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string', 'max:64'],
+            'username' => ['sometimes', 'string', 'max:64'],
             'password' => ['sometimes', 'string','min:8', 'confirmed'],
             'phone' => ['sometimes','string','max:16']
         ];

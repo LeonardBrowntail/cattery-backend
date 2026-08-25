@@ -13,7 +13,6 @@ class UserPolicy
         if ($user->isAdmin()) {
             return true;
         }
-
         return null;
     }
 

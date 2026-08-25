@@ -37,7 +37,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderDetail> $orders
  * @property-read int|null $orders_count
  * @property-read \App\Models\CatImage|null $primaryImage
- * @method static Builder<static>|Cat breed(?string $breed)
  * @method static \Database\Factories\CatFactory factory($count = null, $state = [])
  * @method static Builder<static>|Cat newModelQuery()
  * @method static Builder<static>|Cat newQuery()
@@ -45,7 +44,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder<static>|Cat query()
  * @method static Builder<static>|Cat search(?string $keyword)
  * @method static Builder<static>|Cat sex(?string $sex)
- * @method static Builder<static>|Cat status(?string $status)
+ * @method static Builder<static>|Cat status(?array $status)
  * @method static Builder<static>|Cat whereBirthdate($value)
  * @method static Builder<static>|Cat whereBreed($value)
  * @method static Builder<static>|Cat whereColor($value)
@@ -130,19 +129,14 @@ class Cat extends Model
 
     // Query scopes
 
-    public function scopeBreed(Builder $query, ?string $breed)
-    {
-        return $breed ? $query->where('breed', $breed) : $query;
-    }
-
     public function scopeSex(Builder $query, ?string $sex)
     {
         return $sex ? $query->where('sex', $sex) : $query;
     }
 
-    public function scopeStatus(Builder $query, ?string $status)
+    public function scopeStatus(Builder $query, ?array $status)
     {
-        return $status ? $query->where('status', $status) : $query;
+        return $status ? $query->whereIn('status', $status) : $query;
     }
 
     public function scopePriceBetween(Builder $query, ?float $minPrice, ?float $maxPrice)

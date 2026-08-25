@@ -36,7 +36,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'message' => "validation failed",
-                    'data' => null,
                     'errors' => $e->errors()
                 ]);
             }
@@ -47,8 +46,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'message' => 'unauthenticated',
-                    'data'    => null,
-                    'errors'  => null,
                 ], 401);
             }
         });
@@ -58,8 +55,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'message' => 'unauthorized action',
-                    'data'    => null,
-                    'errors'  => null,
                 ], 403);
             }
         });
@@ -69,22 +64,17 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'success' => false,
                     'message' => 'Resource not found',
-                    'data'    => null,
-                    'errors'  => null,
                 ], 404);
             }
         });
 
-        $exceptions->render(function (\Throwable $e, $request) {
+        $exceptions->render(function (Request $request, Throwable $exception) {
             if ($request->is('api/*')) {
-                $status = method_exists($e, 'getStatusCode') ? $e->getStatusCode() : 500;
-
                 return response()->json([
                     'success' => false,
-                    'message' => app()->isProduction() ? 'Server error' : $e->getMessage(),
-                    'data'    => null,
-                    'errors'  => app()->isProduction() ? null : ['exception' => get_class($e)],
-                ], $status);
+                    'message' => app()->isProduction() ? 'Server error' : $exception->getMessage(),
+                    'errors'  => app()->isProduction() ? null : ['exception' => get_class($exception)],
+                ], 500);
             }
         });
     })->create();

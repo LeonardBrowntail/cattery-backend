@@ -18,6 +18,10 @@ trait UserAPIResponses
         return $this->generalResponse(true, "updated user", 200, $data);
     }
 
+    private function userUpdateInvalidResponse(mixed $data) {
+        return $this->generalResponse(true, "updated user", 200, $data);
+    }
+
     private function userDestroySuccessResponse() {
         return $this->generalResponse(true, "deleted user", 200);
     }
