@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\ApiTraits\UserAPIResponses;
 use App\Http\Requests\DestroyUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -57,7 +58,7 @@ class UserController extends Controller
             $user->update($request->safe()->toArray());
         });
 
-        return $this->userUpdateSuccessResponse($user->fresh()->toResource());
+        return $this->userUpdateSuccessResponse($user->toResource());
     }
 
     /**

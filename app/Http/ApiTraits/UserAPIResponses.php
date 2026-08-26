@@ -19,7 +19,7 @@ trait UserAPIResponses
     }
 
     private function userUpdateInvalidResponse(mixed $data) {
-        return $this->generalResponse(true, "updated user", 200, $data);
+        return $this->generalResponse(false, "invalid field(s)", 400, $data);
     }
 
     private function userDestroySuccessResponse() {

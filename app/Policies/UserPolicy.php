@@ -8,8 +8,10 @@ class UserPolicy
 {
     /**
      * Bypass for admins.
+     * @return bool|null
      */
-    public function before(User $user, string $ability) {
+    public function before(User $user, string $ability): bool|null
+    {
         if ($user->isAdmin()) {
             return true;
         }
@@ -29,7 +31,7 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return false;
+        return $user->id === $model->id;
     }
 
     /**
