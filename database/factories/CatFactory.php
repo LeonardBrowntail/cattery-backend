@@ -32,7 +32,6 @@ class CatFactory extends Factory
                 'Black', 'White', 'Tabby', 'Calico', 'Ginger', 'Tortoiseshell', 'Grey'
             ]),
             'birthdate' => $this->faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
-            'weight' => $this->faker->randomFloat(2, 2.5, 8.0), // weight in kg
             'price' => $this->faker->numberBetween(100, 999) * 100000,
             'description' => $this->faker->text(128),
             'status' => $this->faker->randomElement(['Available', 'Reserved', 'Sold']),
