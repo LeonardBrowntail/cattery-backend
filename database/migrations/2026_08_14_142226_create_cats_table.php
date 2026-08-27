@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('father_id')->nullable()->constrained('cats')->nullOnDelete();
             $table->foreignId('mother_id')->nullable()->constrained('cats')->nullOnDelete();
-            $table->dateTime('birthdate')->index('birtdate_index');
+            $table->date('birthdate')->index('birtdate_index');
             $table->string('breed')->index('breed_index');
             $table->string('sex')->index('sex_index');
             $table->decimal('price', 12, 2);

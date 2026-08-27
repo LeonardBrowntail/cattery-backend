@@ -27,22 +27,41 @@ class CatFactory extends Factory
                 'Persian', 'Maine Coon', 'Siamese', 'Ragdoll', 
                 'Bengal', 'Sphynx', 'British Shorthair', 'Abyssinian'
             ]),
-            'sex' => $this->faker->randomElement(['male', 'female']),
+            'sex' => $this->faker->randomElement(['Male', 'Female']),
             'color' => $this->faker->randomElement([
                 'Black', 'White', 'Tabby', 'Calico', 'Ginger', 'Tortoiseshell', 'Grey'
             ]),
-            'birthdate' => $this->faker->dateTimeBetween('-5 years', 'now')->format('Y-m-d'),
+            'birthdate' => $this->faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
             'weight' => $this->faker->randomFloat(2, 2.5, 8.0), // weight in kg
             'price' => $this->faker->numberBetween(100, 999) * 100000,
             'description' => $this->faker->text(128),
-            'status' => $this->faker->randomElement(['available', 'reserved', 'sold']),
+            'status' => $this->faker->randomElement(['Available', 'Reserved', 'Sold']),
         ];
     }
 
-    public function withParents() : static {
+    public function older(): static {
         return $this->state(fn (array $attributes) => [
-            'father_id' => Cat::where('sex', 'male')->inRandomOrder()->first()?->id ?? Cat::factory()->create(['sex' => 'male'])->id,
-            'mother_id' => Cat::where('sex', 'female')->inRandomOrder()->first()?->id ?? Cat::factory()->create(['sex' => 'female'])->id
+            'birthdate' => $this->faker->dateTimeBetween('-5 years', '-2 years')->format('Y-m-d')
+        ]);
+    }
+
+    /**
+     * Make the factory cat status to be "Reserved".
+     * @return CatFactory
+     */
+    public function reserved(): static {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'Reserved'
+        ]);
+    }
+
+    /**
+     * Make the factory cat status to be "Sold".
+     * @return CatFactory
+     */
+    public function sold(): static {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'Sold'
         ]);
     }
 }

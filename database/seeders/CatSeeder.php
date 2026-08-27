@@ -13,15 +13,20 @@ class CatSeeder extends Seeder
      */
     public function run(): void
     {
-        Cat::factory()->count(10)->create();
+        Cat::factory()->older()->reserved()->count(10)->create();
 
         Cat::factory()->count(20)->create()->each(function ($cat) {
-            if (rand(1,100) <= 70) {
-                $cat->update([
-                    'father_id' => Cat::where('sex', 'male')->where('id', '!=', $cat->id)->inRandomOrder()->first()?->id,
-                    'mother_id' => Cat::where('sex', 'female')->where('id', '!=', $cat->id)->inRandomOrder()->first()?->id,
-                ]);
-            }
+            $query = function (string $gender) use ($cat) {
+                return Cat::where([
+                    ['id', '!=', $cat->id],
+                    ['sex', '=', $gender],
+                    ['birthdate', '<', $cat->birthdate]
+                ])->get()->random()->id;
+            };
+            $cat->update([
+                'father_id' => $query('Male'),
+                'mother_id' => $query('Female')
+            ]);
         });
     }
 }
