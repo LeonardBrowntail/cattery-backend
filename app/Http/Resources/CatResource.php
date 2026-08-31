@@ -3,38 +3,45 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
-class CatResource extends JsonResource
+class CatResource extends JsonApiResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function toAttributes(Request $request): array
     {
-        $list = [
-            'id' => $this->id,
+        return [
             'father' => new CatResource($this->whenLoaded('father')),
             'mother' => new CatResource($this->whenLoaded('mother')),
-            'birthdate' => $this->birthdate,
-            'breed' => $this->breed,
-            'sex' => $this->sex,
-            'price' => (float) $this->price,
             'name' => $this->name,
+            'sex' => $this->sex,
             'color' => $this->color,
+            'breed' => $this->breed,
+            'birthdate' => $this->birthdate,
+            'price' => (float) $this->price,
             'description' => $this->description,
             'status' => $this->status,
             'images' => CatImageResource::collection($this->whenLoaded('images')),
             'primary_image' => new CatImageResource($this->whenLoaded('primaryImage')),
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at
         ];
+    }
 
-        if ($request->user()?->isAdmin()) {
-            $list['created_at'] = $this->created_at;
-            $list['updated_at'] = $this->updated_at;
-        }
+    public function toRelationships(Request $request) {
+        return [
+            'father',
+            'mother',
+            'childrenAsFather',
+            'childrenAsMother',
+            'primaryImage',
+            'baskets',
+            'orders'
+        ];
+    }
 
-        return $list;
+    public function toLinks(Request $request) {
+        return [
+            'self' => route('cats.show', $this->resource)
+        ];
     }
 }

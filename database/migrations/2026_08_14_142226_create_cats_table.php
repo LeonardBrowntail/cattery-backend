@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('breed')->index('breed_index');
             $table->date('birthdate')->index('birtdate_index');
             $table->decimal('price', 12, 2);
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->string('status');
             $table->timestamps();
         });

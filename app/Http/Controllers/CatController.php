@@ -9,21 +9,20 @@ use App\Http\Requests\UpdateCatRequest;
 use App\Http\Resources\CatResource;
 use App\Models\Cat;
 use App\Models\CatImage;
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class CatController extends Controller
 {
-    use AuthorizesRequests, CatAPIResponses;
+    use CatAPIResponses;
     /**
      * Display a listing of the resource.
      */
     public function index(IndexCatRequest $request)
     {
             $cats = Cat::query()
-            ->with($request->includeParents() ? ['primaryImage', 'father', 'mother'] : ['primaryImage'])
+            ->with(['primaryImage'])
             ->search($request->search())
             ->sex($request->sex())
             ->status($request->status())
@@ -34,7 +33,7 @@ class CatController extends Controller
             ->paginate($request->perPage())
             ->withQueryString();
         
-        return $this->catIndexSuccessResponse(CatResource::collection($cats));
+        return $this->catIndexSuccessResponse($cats->toResourceCollection());
     }
 
     /**
@@ -43,7 +42,7 @@ class CatController extends Controller
     public function store(CreateCatRequest $request)
     {
         if (isset($request->validator) && $request->validator->fails()) {
-            return $this->catCreateFailedValidationResponse($request->validator->errors());
+            $this->catInvalidResponse($request->validator->errors());
         }
 
         $cat = DB::transaction(function() use ($request) {
@@ -81,6 +80,10 @@ class CatController extends Controller
      */
     public function update(UpdateCatRequest $request, int $id)
     {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return $this->catInvalidResponse($request->validator->errors());
+        }
+
         $cat = Cat::find($id);
 
         if (!$cat) {

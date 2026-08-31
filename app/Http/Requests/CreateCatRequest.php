@@ -12,14 +12,6 @@ class CreateCatRequest extends FormRequest
 {
     use ExposeValidatorOnFail;
     /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return $this->user()?->can('create') ?? false;
-    }
-
-    /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, ValidationRule|array<mixed>|string>
@@ -27,59 +19,86 @@ class CreateCatRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'breed' => ['required', 'string', 'max:255'],
-            'sex' => ['required', 'in:male,female'],
             'father_id' => ['nullable', 'integer', 'exists:cats,id'],
             'mother_id' => ['nullable', 'integer', 'exists:cats,id'],
-            'birthdate' => ['nullable', 'date', 'before_or_equal:today'],
-            'color' => ['nullable', 'string', 'max:255'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'status' => ['nullable', 'in:available,reserved,sold'],
+            'name' => ['required', 'string', 'max:128'],
+            'sex' => ['required', 'in:Male,Female'],
+            'breed' => ['required', 'string', 'max:64'],
+            'color' => ['required', 'string', 'max:64'],
+            'birthdate' => ['required','nullable', 'date', 'before_or_equal:today', 'date_format:Y-m-d'],
+            'price' => ['required', 'numeric', 'max_digits:9'],
+            'status' => ['required', 'string', 'in:Available,Reserved,Sold'],
             'pedigree_info' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
-
             'images' => ['nullable', 'array', 'max:5'],
             'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5MB each
             'primary_image_index' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
-    public function withValidator(Validator $validator) {
-        $validator->after(function(Validator $validator) {
-            $this->assertNotSelf($validator, 'father_id');
-            $this->assertNotSelf($validator, 'mother_id');
-            $this->assertParentSex($validator, 'father_id', 'male');
-            $this->assertParentSex($validator, 'mother_id', 'female');
-        });
-    }
-
-    protected function assertNotSelf(Validator $validator, string $field) {
-        $id = $this->input($field);
-        if (!$id) {
-            return;
-        }
-        $routeId = $this->route('id');
-        if (!$routeId) {
-            return;
-        }
-
-        if ((int) $id === (int) $routeId) {
-            $validator->errors()->add($field, 'A cat cannot be its own parent');
-        }
-    }
-
+    /**
+     * Asserts the cat's parent sex.
+     * @param Validator $validator Validator instance.
+     * @param string $field Request field.
+     * @param string $expectedSex Expected sex of the parent.
+     * @return void
+     */
     protected function assertParentSex(Validator $validator, string $field, string $expectedSex) {
         $id = $this->input($field);
+        if (!$id) return;
 
-        if (!$id) {
+        $sex = Cat::whereKey($id)->value('sex');
+        if (!$sex) {
+            $validator->errors()->add($field, "Cat with id {$id} not found.");
             return;
         }
 
-        $sex = Cat::whereKey($id)->value('sex');
-
         if ($sex !== null && $sex !== $expectedSex) {
-            $validator->errors()->add('$field', "{$field} must belong to a {$expectedSex} cat.");
+            $validator->errors()->add($field, "{$field} must belong to a {$expectedSex} cat.");
         }
+    }
+
+    /**
+     * Asserts the parents to be older than the cat.
+     * @param Validator $validator Validator instance.
+     * @param string $field Request field.
+     * @return void
+     */
+    protected function assertLogicalAge(Validator $validator, string $field) {
+        $id = $this->input($field);
+        if (!$id) return;
+
+        $cat = Cat::whereKey($id)->value('birthdate');
+        if (!$cat) {
+            $validator->errors()->add($field, "Cat with id {$id} not found.");
+            return;
+        }
+
+        $birthdate = $this->input('birthdate');
+        if (!$birthdate) {
+            $validator->errors()->add($field, "Cat birthdate cannot be fethched.");
+            return;
+        }
+
+        $requestBirthdate = date_create($this->input('birthdate'));
+        $parentBirthdate = date_create(Cat::whereKey($id)->value('birthdate'));
+
+        $diff = (int) date_diff($requestBirthdate, $parentBirthdate)->format('%r%a');
+        if ($diff >= -180) {
+            $validator->errors()->add($field, "parent must be at least 180 days (6 months) older, the specified parent is only {$diff} days old");
+        }
+    }
+
+    public function after(): array {
+        return [
+            function (Validator $validator) {
+                $this->assertParentSex($validator, 'father_id', 'Male');
+                $this->assertParentSex($validator, 'mother_id', 'Female');
+            }, 
+            function (Validator $validator) {
+                $this->assertLogicalAge($validator, 'father_id');
+                $this->assertLogicalAge($validator, 'mother_id');
+            }
+        ];
     }
 }

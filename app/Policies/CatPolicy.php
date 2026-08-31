@@ -2,12 +2,22 @@
 
 namespace App\Policies;
 
-use App\Models\Cat;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class CatPolicy
 {
+    /**
+     * Bypass for admins.
+     * @return bool|null
+     */
+    public function before(User $user, string $ability): bool|null
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+        return null;
+    }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -29,7 +39,7 @@ class CatPolicy
      */
     public function create(User $user): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**
@@ -37,7 +47,7 @@ class CatPolicy
      */
     public function update(User $user): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**
@@ -45,7 +55,7 @@ class CatPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**
@@ -53,7 +63,7 @@ class CatPolicy
      */
     public function restore(User $user): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 
     /**
@@ -61,6 +71,6 @@ class CatPolicy
      */
     public function forceDelete(User $user): bool
     {
-        return $user->isAdmin();
+        return false;
     }
 }

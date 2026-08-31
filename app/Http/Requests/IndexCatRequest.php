@@ -26,8 +26,8 @@ class IndexCatRequest extends FormRequest
         return [];
     }
 
-    public function includeParents() {
-        return $this->exists('includeParents');
+    public function parents() {
+        return $this->exists('parents');
     }
 
     public function search() {

@@ -20,10 +20,12 @@ class UserResource extends JsonApiResource
         ];
     }
 
-    public $relationship = [
-        'baskets',
-        'orders'
-    ];
+    public function toRelationships(Request $request) {
+        return [
+            'baskets',
+            'orders'
+        ];
+    }
 
     public function toLinks(Request $request): array {
         return [

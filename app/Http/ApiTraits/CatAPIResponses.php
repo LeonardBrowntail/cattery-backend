@@ -25,14 +25,14 @@ trait CatAPIResponses
     }
 
     private function catDestroySuccessResponse() {
-        return $this->generalResponse(true, "deleted cat entry", 204);
+        return $this->generalResponse(true, "deleted cat", 200);
     }
 
     private function catNotFoundResponse() {
         return $this->generalResponse(false, "cat not found", 404);
     }
 
-    private function catCreateFailedValidationResponse(mixed $errors) {
+    private function catInvalidResponse(mixed $errors) {
         return $this->generalResponse(false, "invalid field(s)", 400, $errors);
     }
 }
