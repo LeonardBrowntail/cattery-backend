@@ -38,6 +38,20 @@ class CatFactory extends Factory
         ];
     }
 
+    /**
+     * Make the factory cat price 0.
+     * @return CatFactory
+     */
+    public function noPrice(): static {
+        return $this->state(fn (array $attributes) => [
+            'price' => 0
+        ]);
+    }
+
+    /**
+     * Make the factory cat age between 2 to 5 years older than now.
+     * @return CatFactory
+     */
     public function older(): static {
         return $this->state(fn (array $attributes) => [
             'birthdate' => $this->faker->dateTimeBetween('-5 years', '-2 years')->format('Y-m-d')
@@ -45,12 +59,23 @@ class CatFactory extends Factory
     }
 
     /**
-     * Make the factory cat status to be "Reserved".
+     * Make the factory cat status to be "Available".
+     * @return CatFactory
+     */
+    public function available(): static {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'Available'
+        ]);
+    }
+
+    /**
+     * Make the factory cat status to be "Reserved" and set their price to 0.
      * @return CatFactory
      */
     public function reserved(): static {
         return $this->state(fn (array $attributes) => [
-            'status' => 'Reserved'
+            'status' => 'Reserved',
+            'price' => 0
         ]);
     }
 
@@ -61,6 +86,26 @@ class CatFactory extends Factory
     public function sold(): static {
         return $this->state(fn (array $attributes) => [
             'status' => 'Sold'
+        ]);
+    }
+
+    /**
+     * Make the factory cat sex to "Female".
+     * @return CatFactory
+     */
+    public function female(): static {
+        return $this->state(fn (array $attributes) => [
+            'sex' => 'Female'
+        ]);
+    }
+
+    /**
+     * Make the factory cat sex to "Male".
+     * @return CatFactory
+     */
+    public function male(): static {
+        return $this->state(fn (array $attributes) => [
+            'sex' => 'Male'
         ]);
     }
 }

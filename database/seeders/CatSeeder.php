@@ -13,7 +13,8 @@ class CatSeeder extends Seeder
      */
     public function run(): void
     {
-        Cat::factory()->older()->reserved()->count(10)->create();
+        Cat::factory()->male()->older()->reserved()->count(5)->create();
+        Cat::factory()->female()->older()->reserved()->count(5)->create();
 
         Cat::factory()->count(20)->create()->each(function ($cat) {
             $query = function (string $gender) use ($cat) {
