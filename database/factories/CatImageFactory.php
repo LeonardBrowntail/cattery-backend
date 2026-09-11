@@ -2,11 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Cat;
 use App\Models\CatImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<CatImage>
@@ -23,7 +20,7 @@ class CatImageFactory extends Factory
         return [
             'cat_id' => null,
             'path' => null,
-            'is_primary' => false
+            'is_primary' => false,
         ];
     }
 

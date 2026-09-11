@@ -3,27 +3,33 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
-class BasketResource extends JsonResource
+class BasketResource extends JsonApiResource
 {
     /**
-     * Transform the resource into an array.
-     *
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function toAttributes(Request $request): array
     {
-        if ($request->user()->isAdmin()) {
-            return [
-                'user' => new UserResource($this->whenLoaded('owner')),
-                'cat' => new CatResource($this->whenLoaded('cat')),
-                'created_at' => $this->created_at,
-                'updated_at' => $this->updated_at
-            ];
-        }
+        $admin = $request->user()->isAdmin();
+
         return [
-            'cat' => new CatResource($this->whenLoaded('cat'))
+            'user' => $admin ? $this->resource->user_id : null,
+            'cat' => new CatResource($this->whenLoaded('cat')),
+            'created_at' => $admin ? $this->resource->created_at : null,
+            'updated_at' => $admin ? $this->resource->updated_at : null,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function toRelationships(Request $request): array
+    {
+        return [
+            'owner' => UserResource::class,
+            'cat' => CatResource::class,
         ];
     }
 }

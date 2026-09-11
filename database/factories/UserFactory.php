@@ -28,18 +28,19 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'password' => static::$password ??= Hash::make(fake()->password(8)),
             'phone' => fake()->phoneNumber(),
-            'is_admin' => false
+            'is_admin' => false,
         ];
     }
 
     /**
      * Changes the state of is_admin
-     * @param bool $state set to `true` to make `user` admin, `false` otherwise
-     * @return static
+     *
+     * @param  bool  $state  set to `true` to make `user` admin, `false` otherwise
      */
-    public function isAdmin(bool $state = true): static {
+    public function isAdmin(bool $state = true): static
+    {
         return $this->state(fn (array $attributes) => [
-            'is_admin' => $state
+            'is_admin' => $state,
         ]);
     }
 }

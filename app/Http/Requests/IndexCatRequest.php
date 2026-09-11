@@ -2,79 +2,88 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use SortDirection;
 
 class IndexCatRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function parents(): bool
     {
-        return true;
-    }
-
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
-    {
-        return [];
-    }
-
-    public function parents() {
         return $this->exists('parents');
     }
 
-    public function search() {
-        return $this->query('search');
+    public function search(): ?string
+    {
+        $value = $this->query('search');
+
+        return is_string($value) ? $value : null;
     }
 
-    public function sex() {
-        return $this->query('sex');
+    public function sex(): ?string
+    {
+        $value = $this->query('sex');
+
+        return is_string($value) ? $value : null;
     }
 
-    public function status() {
+    /** @return array<int, string>|string|null */
+    public function status()
+    {
+        if ($this->user() == null || ! $this->user()->isAdmin()) {
+            return 'Available';
+        }
+
         $str = $this->query('status');
-        if (!$str) return null;
-        return explode(',',$str);
+        if (! is_string($str) || $str === '') {
+            return null;
+        }
+
+        return explode(',', $str);
     }
 
-    public function sort() {
-        $raw = $this->query('sort');
+    public function sort(): string
+    {
+        $raw = (string) $this->query('sort');
         if (str_contains($raw, 'price')) {
             return 'price';
         }
         if (str_contains($raw, 'age')) {
             return 'birthdate';
         }
+
         return 'updated_at';
     }
 
-    public function sortDir() {
-        if ($this->has('asc')) {
-            return SortDirection::Ascending;
-        }
-        return SortDirection::Descending;
+    /**
+     * @return 'asc'|'desc'
+     */
+    public function sortDir(): string
+    {
+        return $this->has('asc') ? 'asc' : 'desc';
     }
 
-    public function minPrice() {
-        return $this->query('minPrice');
+    public function minPrice(): ?string
+    {
+        $value = $this->query('minPrice');
+
+        return is_string($value) ? $value : null;
     }
 
-    public function maxPrice() {
-        return $this->query('maxPrice');
+    public function maxPrice(): ?string
+    {
+        $value = $this->query('maxPrice');
+
+        return is_string($value) ? $value : null;
     }
 
-    public function page() {
-        return $this->query('page');
+    public function page(): ?string
+    {
+        $value = $this->query('page');
+
+        return is_string($value) ? $value : null;
     }
 
-    public function perPage() {
+    public function perPage(): int
+    {
         return $this->integer('perPage', 12);
     }
 }

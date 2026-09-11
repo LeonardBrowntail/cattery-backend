@@ -7,27 +7,34 @@ use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 
 class CatResource extends JsonApiResource
 {
+    /**
+     * @return array<string, mixed>
+     */
     public function toAttributes(Request $request): array
     {
         return [
             'father' => new CatResource($this->whenLoaded('father')),
             'mother' => new CatResource($this->whenLoaded('mother')),
-            'name' => $this->name,
-            'sex' => $this->sex,
-            'color' => $this->color,
-            'breed' => $this->breed,
-            'birthdate' => $this->birthdate,
-            'price' => (float) $this->price,
-            'description' => $this->description,
-            'status' => $this->status,
+            'name' => $this->resource->name,
+            'sex' => $this->resource->sex,
+            'color' => $this->resource->color,
+            'breed' => $this->resource->breed,
+            'birthdate' => $this->resource->birthdate,
+            'price' => (float) $this->resource->price,
+            'description' => $this->resource->description,
+            'status' => $this->resource->status,
             'images' => CatImageResource::collection($this->whenLoaded('images')),
             'primary_image' => new CatImageResource($this->whenLoaded('primaryImage')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
         ];
     }
 
-    public function toRelationships(Request $request) {
+    /**
+     * @return array<int, string>
+     */
+    public function toRelationships(Request $request): array
+    {
         return [
             'father',
             'mother',
@@ -35,13 +42,17 @@ class CatResource extends JsonApiResource
             'childrenAsMother',
             'primaryImage',
             'baskets',
-            'orders'
+            'orders',
         ];
     }
 
-    public function toLinks(Request $request) {
+    /**
+     * @return array<string, string>
+     */
+    public function toLinks(Request $request): array
+    {
         return [
-            'self' => route('cats.show', $this->resource)
+            'self' => route('cats.show', $this->resource),
         ];
     }
 }

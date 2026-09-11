@@ -2,24 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 use MadeByClowd\Nusantara\Seeders\NusantaraCoreSeeder;
 
 class ProductionSeeder extends Seeder
 {
     use WithoutModelEvents;
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $adminSeeder = new AdminSeeder();
+        $adminSeeder = new AdminSeeder;
         $adminSeeder->run();
-        
-        $nusaSeeder = new NusantaraCoreSeeder();
+
+        $nusaSeeder = new NusantaraCoreSeeder;
         $nusaSeeder->run();
     }
 }

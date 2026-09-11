@@ -2,18 +2,24 @@
 
 namespace App\Models;
 
+use App\Policies\CatPolicy;
+use Carbon\CarbonImmutable;
 use Database\Factories\CatFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * @property int $id
  * @property int|null $father_id
  * @property int|null $mother_id
- * @property \Carbon\CarbonImmutable $birthdate
+ * @property CarbonImmutable $birthdate
  * @property string $breed
  * @property string $sex
  * @property numeric $price
@@ -22,21 +28,22 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $description
  * @property numeric $weight
  * @property string $status
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Basket> $baskets
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Collection<int, Basket> $baskets
  * @property-read int|null $baskets_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Cat> $childrenAsFather
+ * @property-read Collection<int, Cat> $childrenAsFather
  * @property-read int|null $children_as_father_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, Cat> $childrenAsMother
+ * @property-read Collection<int, Cat> $childrenAsMother
  * @property-read int|null $children_as_mother_count
  * @property-read Cat|null $father
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\CatImage> $images
+ * @property-read Collection<int, CatImage> $images
  * @property-read int|null $images_count
  * @property-read Cat|null $mother
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\OrderDetail> $orders
+ * @property-read Collection<int, OrderDetail> $orders
  * @property-read int|null $orders_count
- * @property-read \App\Models\CatImage|null $primaryImage
+ * @property-read CatImage|null $primaryImage
+ *
  * @method static \Database\Factories\CatFactory factory($count = null, $state = [])
  * @method static Builder<static>|Cat newModelQuery()
  * @method static Builder<static>|Cat newQuery()
@@ -44,7 +51,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder<static>|Cat query()
  * @method static Builder<static>|Cat search(?string $keyword)
  * @method static Builder<static>|Cat sex(?string $sex)
- * @method static Builder<static>|Cat status(?array $status)
+ * @method static Builder<static>|Cat status(array<int, string>|string|null $status)
  * @method static Builder<static>|Cat whereBirthdate($value)
  * @method static Builder<static>|Cat whereBreed($value)
  * @method static Builder<static>|Cat whereColor($value)
@@ -59,12 +66,14 @@ use Illuminate\Database\Eloquent\Model;
  * @method static Builder<static>|Cat whereStatus($value)
  * @method static Builder<static>|Cat whereUpdatedAt($value)
  * @method static Builder<static>|Cat whereWeight($value)
+ *
  * @mixin \Eloquent
  */
 #[UseFactory(CatFactory::class)]
 #[UsePolicy(CatPolicy::class)]
 class Cat extends Model
 {
+    /** @use HasFactory<CatFactory> */
     use HasFactory;
 
     protected $table = 'cats';
@@ -87,59 +96,84 @@ class Cat extends Model
         'price' => 'decimal:2',
     ];
 
-    public function baskets()
+    /** @return HasMany<Basket, $this> */
+    public function baskets(): HasMany
     {
         return $this->hasMany(Basket::class);
     }
 
-    public function orders()
+    /** @return HasMany<OrderDetail, $this> */
+    public function orders(): HasMany
     {
         return $this->hasMany(OrderDetail::class);
     }
 
-    public function father()
+    /** @return BelongsTo<Cat, $this> */
+    public function father(): BelongsTo
     {
         return $this->belongsTo(Cat::class);
     }
 
-    public function mother()
+    /** @return BelongsTo<Cat, $this> */
+    public function mother(): BelongsTo
     {
         return $this->belongsTo(Cat::class);
     }
 
-    public function childrenAsFather()
+    /** @return HasMany<Cat, $this> */
+    public function childrenAsFather(): HasMany
     {
         return $this->hasMany(Cat::class, 'father_id');
     }
 
-    public function childrenAsMother()
+    /** @return HasMany<Cat, $this> */
+    public function childrenAsMother(): HasMany
     {
         return $this->hasMany(Cat::class, 'mother_id');
     }
 
-    public function images()
+    /** @return HasMany<CatImage, $this> */
+    public function images(): HasMany
     {
         return $this->hasMany(CatImage::class);
     }
 
-    public function primaryImage()
+    /** @return HasOne<CatImage, $this> */
+    public function primaryImage(): HasOne
     {
         return $this->hasOne(CatImage::class)->where('is_primary', true);
     }
 
     // Query scopes
 
-    public function scopeSex(Builder $query, ?string $sex)
+    /**
+     * @param  Builder<Cat>  $query
+     * @return Builder<Cat>
+     */
+    public function scopeSex(Builder $query, ?string $sex): Builder
     {
         return $sex ? $query->where('sex', $sex) : $query;
     }
 
-    public function scopeStatus(Builder $query, ?array $status)
+    /**
+     * @param  Builder<Cat>  $query
+     * @param  array<int, string>|string|null  $status
+     * @return Builder<Cat>
+     */
+    public function scopeStatus(Builder $query, array|string|null $status): Builder
     {
-        return $status ? $query->whereIn('status', $status) : $query;
+        if ($status === null) {
+            return $query;
+        }
+
+        return $query->whereIn('status', (array) $status);
     }
 
-    public function scopePriceBetween(Builder $query, ?float $minPrice, ?float $maxPrice)
+    /**
+     * @param  Builder<Cat>  $query
+     * @return Builder<Cat>
+     */
+    public function scopePriceBetween(Builder $query, ?float $minPrice, ?float $maxPrice): Builder
     {
         if ($minPrice !== null) {
             $query->where('price', '>=', $minPrice);
@@ -151,7 +185,11 @@ class Cat extends Model
         return $query;
     }
 
-    public function scopeSearch(Builder $query, ?string $keyword)
+    /**
+     * @param  Builder<Cat>  $query
+     * @return Builder<Cat>
+     */
+    public function scopeSearch(Builder $query, ?string $keyword): Builder
     {
         if (! $keyword) {
             return $query;

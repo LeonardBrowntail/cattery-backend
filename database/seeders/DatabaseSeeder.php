@@ -13,12 +13,12 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      */
     public function run(): void
-    {   
+    {
         $seeder = null;
         if (app()->isProduction()) {
-            $seeder = new ProductionSeeder();
+            $seeder = new ProductionSeeder;
         } else {
-            $seeder = new DevSeeder();
+            $seeder = new DevSeeder;
         }
         $seeder->run();
     }

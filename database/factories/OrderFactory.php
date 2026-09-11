@@ -5,10 +5,6 @@ namespace Database\Factories;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use MadeByClowd\Nusantara\Models\District;
-use MadeByClowd\Nusantara\Models\Province;
-use MadeByClowd\Nusantara\Models\Regency;
-use MadeByClowd\Nusantara\Models\Village;
 
 /**
  * @extends Factory<Order>
@@ -16,6 +12,7 @@ use MadeByClowd\Nusantara\Models\Village;
 class OrderFactory extends Factory
 {
     protected $model = Order::class;
+
     /**
      * Define the model's default state.
      *
@@ -23,28 +20,21 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
-        $orderCount = Order::count();
-        if ($orderCount < 1) {
-            $user_id = User::all()->random()->id;
-        } else {
-            $ids = Order::get(['user_id']);
-            $user_id = User::whereNotIn('id',$ids);
-        }
-        $user_id = User::all()->random();
-        $province = Province::all()->random();
-        $regency = Regency::where('province_id', $province->id)->get()->random();
-        $district = District::where('regency_id', $regency->id)->get()->random();
-        $village = Village::where('district_id', $district->id)->get()->random();
+        $province = fake()->randomElement(['DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Bali', 'Jawa Timur', 'Sumatera Utara']);
+        $regency = fake()->randomElement(['Kabupaten Bandung', 'Kota Surabaya', 'Kota Denpasar', 'Kota Medan', 'Kabupaten Bogor']);
+        $district = fake()->randomElement(['Kecamatan Cibeunying', 'Kecamatan Sumedang Utara', 'Kecamatan Denpasar Selatan', 'Kecamatan Medan Baru']);
+        $village = fake()->randomElement(['Desa Cibeunying', 'Kelurahan Sumedang', 'Desa Denpasar', 'Kelurahan Medan']);
+
         return [
-            'user_id' => $user_id,
-            'province' => $province->name,
-            'regency' => $regency->name,
-            'district' => $district->name,
-            'village' => $village->name,
+            'user_id' => User::factory(),
+            'province' => $province,
+            'regency' => $regency,
+            'district' => $district,
+            'village' => $village,
             'address' => fake()->streetAddress(),
             'status' => fake()->randomElement([
-                'pending', 'paid', 'sending', 'finished', 'cancelled'
-            ])
+                'pending', 'cancelled', 'sending', 'complete',
+            ]),
         ];
     }
 }

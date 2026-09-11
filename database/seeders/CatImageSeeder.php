@@ -27,6 +27,6 @@ class CatImageSeeder extends Seeder
             </svg>
             SVG
         );
-        CatImage::factory()->count(Cat::count())->addPath($path)->sequence(fn(Sequence $sequence) => ['cat_id' => $sequence->index + 1])->create();
+        CatImage::factory()->count(Cat::count())->addPath($path)->sequence(fn (Sequence $sequence) => ['cat_id' => $sequence->index + 1])->create();
     }
 }

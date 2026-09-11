@@ -3,25 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Http\ApiTraits\CatAPIResponses;
-use App\Http\Requests\IndexCatRequest;
 use App\Http\Requests\CreateCatRequest;
+use App\Http\Requests\IndexCatRequest;
 use App\Http\Requests\UpdateCatRequest;
 use App\Http\Resources\CatResource;
 use App\Models\Cat;
 use App\Models\CatImage;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class CatController extends Controller
 {
     use CatAPIResponses;
+
     /**
      * Display a listing of the resource.
      */
-    public function index(IndexCatRequest $request)
+    public function index(IndexCatRequest $request): JsonResponse
     {
-            $cats = Cat::query()
+        $cats = Cat::query()
             ->with(['primaryImage'])
             ->search($request->search())
             ->sex($request->sex())
@@ -30,32 +32,29 @@ class CatController extends Controller
                 $request->minPrice() !== null ? (float) $request->minPrice() : null,
                 $request->maxPrice() !== null ? (float) $request->maxPrice() : null
             )
+            ->orderBy($request->sort(), $request->sortDir())
             ->paginate($request->perPage())
             ->withQueryString();
-        
+
         return $this->catIndexSuccessResponse($cats->toResourceCollection());
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateCatRequest $request)
+    public function store(CreateCatRequest $request): JsonResponse
     {
         if (isset($request->validator) && $request->validator->fails()) {
-            $this->catInvalidResponse($request->validator->errors());
+            return $this->catInvalidResponse($request->validator->errors());
         }
 
-        $cat = DB::transaction(function() use ($request) {
+        $cat = DB::transaction(function () use ($request) {
             $cat = Cat::create($request->safe()->except(['images', 'primary_image_index']));
 
             $this->storeImages($cat, $request);
 
             return $cat;
         });
-
-        if (!$cat instanceof Cat) {
-            return;
-        }
 
         $cat->load(['images', 'father', 'mother']);
 
@@ -65,20 +64,21 @@ class CatController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(int $id)
+    public function show(int $id): JsonResponse
     {
-        $cat = Cat::with(['images','father','mother'])->find($id);
-        if (!$cat) {
+        $cat = Cat::with(['images', 'father', 'mother'])->find($id);
+
+        if (! $cat) {
             return $this->catNotFoundResponse();
         }
-        $cat->load(['images','father','mother']);
+
         return $this->catShowSuccessResponse(new CatResource($cat));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCatRequest $request, int $id)
+    public function update(UpdateCatRequest $request, int $id): JsonResponse
     {
         if (isset($request->validator) && $request->validator->fails()) {
             return $this->catInvalidResponse($request->validator->errors());
@@ -86,16 +86,14 @@ class CatController extends Controller
 
         $cat = Cat::find($id);
 
-        if (!$cat) {
+        if (! $cat) {
             return $this->catNotFoundResponse();
         }
 
-        DB::transaction(function() use ($cat, $request) {
+        DB::transaction(function () use ($cat, $request) {
             $cat->update($request->safe()->except(['images', 'primary_image_index', 'delete_image_ids']));
-            if ($request->filled('delete_image_ids')) {
-                $this->deleteImages($cat, $request->input('delete_images_ids'));
-            }
 
+            $this->deleteImages($cat, array_map('intval', (array) $request->input('delete_image_ids', [])));
             $this->storeImages($cat, $request);
         });
 
@@ -105,11 +103,11 @@ class CatController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(int $id)
+    public function destroy(int $id): JsonResponse
     {
         $cat = Cat::find($id);
 
-        if (!$cat) {
+        if (! $cat) {
             return $this->catNotFoundResponse();
         }
 
@@ -118,17 +116,18 @@ class CatController extends Controller
         return $this->catDestroySuccessResponse();
     }
 
-    protected function storeImages(Cat $cat, Request $request) {
-        if (!$request->hasFile('images')) {
+    protected function storeImages(Cat $cat, Request $request): void
+    {
+        if (! $request->hasFile('images')) {
             return;
         }
 
         $primaryIndex = $request->input('primary_image_index');
         $hasExistingPrimary = $cat->images()->where('is_primary', true)->exists();
- 
+
         foreach ($request->file('images') as $index => $file) {
             $path = $file->store('cats', 'public');
- 
+
             CatImage::create([
                 'cat_id' => $cat->id,
                 'path' => $path,
@@ -139,14 +138,18 @@ class CatController extends Controller
         }
     }
 
+    /** @param array<int, int> $imageIds */
     protected function deleteImages(Cat $cat, array $imageIds): void
     {
+        if (empty($imageIds)) {
+            return;
+        }
+
         $images = $cat->images()->whereIn('id', $imageIds)->get();
- 
+
         foreach ($images as $image) {
             Storage::disk('public')->delete($image->path);
             $image->delete();
         }
     }
-
 }

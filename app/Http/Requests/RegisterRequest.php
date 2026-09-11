@@ -9,13 +9,6 @@ use Illuminate\Foundation\Http\FormRequest;
 class RegisterRequest extends FormRequest
 {
     use ExposeValidatorOnFail;
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
-    {
-        return true;
-    }
 
     /**
      * Get the validation rules that apply to the request.
@@ -27,8 +20,8 @@ class RegisterRequest extends FormRequest
         return [
             'username' => ['required', 'string', 'max:64'],
             'email' => ['required', 'string', 'unique:users,email'],
-            'password' => ['required', 'string','min:8', 'confirmed'],
-            'phone' => ['string', 'max:16']
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['string', 'max:16'],
         ];
     }
 }

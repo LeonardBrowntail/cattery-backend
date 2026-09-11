@@ -10,4 +10,7 @@ parameters:
         - database/
         - routes/
 
+    excludePaths:
+        - database/migrations/*create_nusantara_tables.php
+
     level: 7

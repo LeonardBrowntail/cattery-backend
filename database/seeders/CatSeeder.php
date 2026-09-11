@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Cat;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class CatSeeder extends Seeder
@@ -21,12 +20,12 @@ class CatSeeder extends Seeder
                 return Cat::where([
                     ['id', '!=', $cat->id],
                     ['sex', '=', $gender],
-                    ['birthdate', '<', $cat->birthdate]
+                    ['birthdate', '<', $cat->birthdate],
                 ])->get()->random()->id;
             };
             $cat->update([
                 'father_id' => $query('Male'),
-                'mother_id' => $query('Female')
+                'mother_id' => $query('Female'),
             ]);
         });
     }

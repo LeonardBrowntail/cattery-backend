@@ -34,35 +34,35 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (ValidationException $e, Request $r) {
             if ($r->is('api/*')) {
                 return response()->json([
-                    'success' => false,
-                    'message' => "validation failed",
-                    'errors' => $e->errors()
+                    'status' => false,
+                    'message' => 'Invalid fields(s). Please revalidate your request.',
+                    'errors' => $e->errors(),
                 ]);
             }
         });
 
-        $exceptions->render(function (AuthenticationException $e, $request) {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'unauthenticated',
+                    'status' => false,
+                    'message' => 'You are not authenticated, please log in first.',
                 ], 401);
             }
         });
 
-        $exceptions->render(function (AuthorizationException $e, $request) {
+        $exceptions->render(function (AuthorizationException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'unauthorized action',
+                    'status' => false,
+                    'message' => 'Unauthorized action',
                 ], 403);
             }
         });
 
-        $exceptions->render(function (ModelNotFoundException|NotFoundHttpException $e, $request) {
+        $exceptions->render(function (ModelNotFoundException|NotFoundHttpException $e, Request $request) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'success' => false,
+                    'status' => false,
                     'message' => 'Resource not found',
                 ], 404);
             }
@@ -71,9 +71,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(function (Request $request, Throwable $exception) {
             if ($request->is('api/*')) {
                 return response()->json([
-                    'success' => false,
+                    'status' => false,
                     'message' => app()->isProduction() ? 'Server error' : $exception->getMessage(),
-                    'errors'  => app()->isProduction() ? null : ['exception' => get_class($exception)],
+                    'errors' => app()->isProduction() ? null : ['exception' => get_class($exception)],
                 ], 500);
             }
         });

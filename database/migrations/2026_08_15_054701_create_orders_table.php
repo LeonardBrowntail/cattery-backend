@@ -1,6 +1,5 @@
 <?php
 
-use Database\Seeders\OrderSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,11 +14,11 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('province')->nullable();
-            $table->string('regency')->nullable();
-            $table->string('district')->nullable();
-            $table->string('village')->nullable();
-            $table->string('address')->nullable();
+            $table->string('province');
+            $table->string('regency');
+            $table->string('district');
+            $table->string('village');
+            $table->string('address');
             $table->string('status')->default('pending');
             $table->timestamps();
         });

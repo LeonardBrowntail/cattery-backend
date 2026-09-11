@@ -3,20 +3,23 @@
 namespace App\Models;
 
 use App\Policies\BasketPolicy;
+use Carbon\CarbonImmutable;
 use Database\Factories\BasketFactory;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
  * @property int $user_id
  * @property int $cat_id
- * @property \Carbon\CarbonImmutable|null $created_at
- * @property \Carbon\CarbonImmutable|null $updated_at
- * @property-read \App\Models\Cat $cat
- * @property-read \App\Models\User $owner
+ * @property CarbonImmutable|null $created_at
+ * @property CarbonImmutable|null $updated_at
+ * @property-read Cat $cat
+ * @property-read User $owner
+ *
  * @method static \Database\Factories\BasketFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Basket newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Basket newQuery()
@@ -26,12 +29,14 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Basket whereId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Basket whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Basket whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 #[UseFactory(BasketFactory::class)]
 #[UsePolicy(BasketPolicy::class)]
 class Basket extends Model
 {
+    /** @use HasFactory<BasketFactory> */
     use HasFactory;
 
     protected $table = 'baskets';
@@ -41,12 +46,14 @@ class Basket extends Model
         'cat_id',
     ];
 
-    public function owner()
+    /** @return BelongsTo<User, $this> */
+    public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function cat()
+    /** @return BelongsTo<Cat, $this> */
+    public function cat(): BelongsTo
     {
         return $this->belongsTo(Cat::class, 'cat_id');
     }

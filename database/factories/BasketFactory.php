@@ -19,16 +19,9 @@ class BasketFactory extends Factory
      */
     public function definition(): array
     {
-        $user = User::all()->random();
-        if ($user->baskets()->count() < 1) {
-            $cat = Cat::all()->random()->id;
-        } else {
-            $basketCatIds = $user->baskets()->get('cat_id')->toArray();
-            $cat = Cat::whereNotIn('id', $basketCatIds)->get()->random()->id;
-        }
         return [
-            'user_id' => $user->id,
-            'cat_id' => $cat
+            'user_id' => User::factory(),
+            'cat_id' => Cat::factory(),
         ];
     }
 }

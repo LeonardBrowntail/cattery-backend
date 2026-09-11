@@ -5,10 +5,12 @@ namespace App\Http\Requests;
 use App\Http\ApiTraits\ExposeValidatorOnFail;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
     use ExposeValidatorOnFail;
+
     /**
      * Get the validation rules that apply to the request.
      *
@@ -18,8 +20,9 @@ class UpdateUserRequest extends FormRequest
     {
         return [
             'username' => ['sometimes', 'string', 'max:64'],
-            'password' => ['sometimes', 'string','min:8', 'confirmed'],
-            'phone' => ['sometimes','string','max:16']
+            'email' => ['sometimes', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($this->route('user'))],
+            'password' => ['sometimes', 'string', 'min:8', 'confirmed'],
+            'phone' => ['sometimes', 'string', 'max:16'],
         ];
     }
 }

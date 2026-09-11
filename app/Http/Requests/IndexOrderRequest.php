@@ -2,37 +2,21 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class IndexOrderRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    public function authorize(): bool
+    public function search(): ?string
     {
-        return $this->user()->isAdmin();
+        $value = $this->query('search');
+
+        return is_string($value) ? $value : null;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public function status(): ?string
     {
-        return [
-            //
-        ];
-    }
+        $value = $this->query('status');
 
-    public function search() {
-        return $this->query('search');
-    }
-
-    public function status() {
-        return $this->query('status');
+        return is_string($value) ? $value : null;
     }
 }

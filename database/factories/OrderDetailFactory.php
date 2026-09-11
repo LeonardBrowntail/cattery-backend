@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,7 +20,7 @@ class OrderDetailFactory extends Factory
         return [
             'order_id' => null,
             'cat_id' => null,
-            'price' => 0
+            'price' => 0,
         ];
     }
 }

@@ -8,21 +8,42 @@ use Illuminate\Http\Resources\JsonApi\JsonApiResource;
 class OrderResource extends JsonApiResource
 {
     /**
-     * The resource's attributes.
+     * @return array<string, mixed>
      */
-    public $attributes = [
-        'province',
-        'regency',
-        'district',
-        'village',
-        'address',
-        'status'
-    ];
+    public function toAttributes(Request $request): array
+    {
+        return [
+            'province' => $this->resource->province,
+            'regency' => $this->resource->regency,
+            'district' => $this->resource->district,
+            'village' => $this->resource->village,
+            'address' => $this->resource->address,
+            'status' => $this->resource->status,
+            'total' => (float) $this->resource->total,
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
+        ];
+    }
 
     /**
-     * The resource's relationships.
+     * @return array<int, string>
      */
-    public $relationships = [
-        'order_details'
-    ];
+    public function toRelationships(Request $request): array
+    {
+        return [
+            'user',
+            'orderDetails',
+            'transaction',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function toLinks(Request $request): array
+    {
+        return [
+            'self' => route('orders.show', $this->resource),
+        ];
+    }
 }

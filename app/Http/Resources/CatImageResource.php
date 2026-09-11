@@ -15,9 +15,10 @@ class CatImageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'path' => $this->path,
-            'is_primary' => (bool) $this->is_primary
+            'id' => $this->resource->id,
+            'path' => $this->resource->path,
+            'url' => $this->resource->url,
+            'is_primary' => (bool) $this->resource->is_primary,
         ];
     }
 }
