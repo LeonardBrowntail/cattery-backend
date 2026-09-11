@@ -25,12 +25,22 @@ trait UserAPIResponses
 
     private function userUpdateInvalidResponse(mixed $data): JsonResponse
     {
-        return $this->generalResponse(false, 'invalid field(s)', 400, $data);
+        return $this->generalResponse(false, 'invalid field(s)', 422, $data);
+    }
+
+    private function userCreateSuccessResponse(mixed $data): JsonResponse
+    {
+        return $this->generalResponse(true, 'created user', 201, $data);
+    }
+
+    private function userCreateInvalidResponse(mixed $data): JsonResponse
+    {
+        return $this->generalResponse(false, 'invalid field(s)', 422, $data);
     }
 
     private function userDestroySuccessResponse(): JsonResponse
     {
-        return $this->generalResponse(true, 'deleted user', 200);
+        return $this->generalResponse(true, 'deleted user', 204);
     }
 
     private function userNotFoundResponse(): JsonResponse

@@ -32,7 +32,7 @@ Authorization: Bearer <token>
 
 | Endpoint | Method | Access | Description |
 | --- | --- | --- | --- |
-| `/api/v1/auth/register` | POST | public | `username, email, password, phone`. 201 |
+| `/api/v1/auth/register` | POST | public | `username, email, password, password_confirmation, phone`. 201 |
 | `/api/v1/auth/login` | POST | public | `email, password`. 200, returns `token` |
 | `/api/v1/auth/logout` | POST | auth | Revoke current token. 200 |
 
@@ -41,30 +41,31 @@ Authorization: Bearer <token>
 | Kind | HTTP | Shape |
 | --- | --- | --- |
 | Success | 200/201/204 | `{ status: true, message, data }` (envelope from `ApiResponse` trait) |
+| Success (list) | 200 | `{ status: true, message, data, meta, links }` — paginated lists (cats, baskets, orders, users, transactions) also emit `meta: { current_page, last_page, per_page, total }` and `links: { first, last, prev, next }` |
 | Errors | 4xx/5xx | `{ status: false, message, errors }` (JSON:API-style 422 payloads use `errors` key) |
 
 | Status | Meaning |
 | --- | --- |
 | `200/201/204` | Ok / created / no content |
-| `400` | Malformed request / bad input (`BadRequestResponse`) |
-| `401` | Missing/invalid bearer token (`UnauthenticatedResponse`) |
-| `403` | Customer hitting an admin-only action, or touching another user's resource (`ForbiddenResponse`) |
-| `404` | Resource not found (`NotFoundResponse`) |
+| `400` | Malformed request / bad input |
+| `401` | Missing/invalid bearer token, or invalid credentials on login |
+| `403` | Customer hitting an admin-only action, or touching another user's resource |
+| `404` | Resource not found |
 | `422` | Validation failed (request form-request rules; 422 with `errors`) |
 | `500` | Unexpected server error |
 
 ## Endpoints
 
 ### Auth
-- `POST /api/v1/auth/register` — public. Fields: `username`, `email`, `password` (min 8), `phone`. Creates a customer.
-- `POST /api/v1/auth/login` — public. `email`, `password`. Returns `{ token, user }`.
+- `POST /api/v1/auth/register` — public. Fields: `username`, `email`, `password` (min 8), `password_confirmation`, `phone`. Creates a customer.
+- `POST /api/v1/auth/login` — public. `email`, `password`. Returns `{ token, user }` with `is_admin` flag.
 - `POST /api/v1/auth/logout` — auth. Invalidates the current token.
 
 ### Users (`/api/v1/users`) — admin management
 | Method | Path | Access | Description |
 | --- | --- | --- | --- |
 | GET | `/api/v1/users` | admin | List (+ `search` via `UserController` scope, pagination `page`/`perPage`) |
-| POST | `/api/v1/users` | admin | `username, email, password, phone, is_admin` |
+| POST | `/api/v1/users` | admin | `username, email, password, password_confirmation, phone, is_admin` (`is_admin` defaults to `false` for non-admin callers; non-admins cannot escalate). 201 |
 | GET | `/api/v1/users/{user}` | admin or owner | |
 | PUT/PATCH | `/api/v1/users/{user}` | admin or owner | |
 | DELETE | `/api/v1/users/{user}` | admin | 204 |
@@ -90,13 +91,12 @@ Authorization: Bearer <token>
 | GET | `/api/v1/baskets` | auth | Customer → own baskets; admin → all (+ `search`, pagination) |
 | POST | `/api/v1/baskets` | auth | `cat_id`. 201. Adds a cat to the customer's basket. |
 | GET | `/api/v1/baskets/{basket}` | owner or admin | Basket with its cat |
-| PUT/PATCH | `/api/v1/baskets/{basket}` | owner or admin | |
+| PUT/PATCH | `/api/v1/baskets/{basket}` | owner or admin | Change the basket's `cat_id` (availability re-checked). 200 |
 | DELETE | `/api/v1/baskets/{basket}` | owner or admin | 204 |
 
-**Basket rules** (`BasketController::store`, `createBasket`):
-- A cat may not be added that is `Reserved` or `Sold` → `422 CatNotAvailable`.
-- A cat already in the customer's basket → `422 AlreadyInBasket`.
-- `BasketDetail` per cat; same cat cannot appear twice per user.
+**Basket rules** (`BasketController::store`/`update`):
+- A cat may not be added that is `Reserved` or `Sold` → `422` with `errors.cat_id`.
+- A cat already in the customer's basket → `422` with `errors.cat_id` ("already in basket").
 
 ### Orders `/api/v1/orders`
 | Method | Path | Access | Description |
@@ -118,15 +118,14 @@ Authorization: Bearer <token>
 | Method | Path | Access | Description |
 | --- | --- | --- | --- |
 | GET | `/api/v1/transactions` | admin | List (+ `search`, `order_id` filter). Paginated. |
-| POST | `/api/v1/transactions` | admin | `order_id, amount, transaction_code?, transaction_time?`. 201 |
+| POST | `/api/v1/transactions` | admin | `order_id, transaction_code, transaction_id, transaction_time`. 201 |
 | GET | `/api/v1/transactions/{transaction}` | admin | |
 | DELETE | `/api/v1/transactions/{transaction}` | admin | 204 |
 
-**Transaction rules** (`transactionStore`/`TransactionStoreRequest`):
-- Only `pending` orders can receive a transaction → else `422 OrderNotPending`.
-- Only one transaction per order (unique `order_id`) → `422 OrderAlreadyHasTransaction`.
-- Recording a transaction for a `complete` (already shipped/sold) order → `422`.
-- `transaction_code` is unique when provided.
+**Transaction rules** (`TransactionController::store`):
+- One transaction per order (unique `order_id`) → duplicate → `422`.
+- `amount` is ignored client-side; the server records `order.total`.
+- Recording a transaction on a `pending` order flips it to `sending`; other statuses are left unchanged.
 
 ## Exceptions / error handling
 
@@ -147,11 +146,10 @@ php artisan test                 # no tests → exits clean
 ```
 app/
   Http/
-    ApiResponses/     # generalized response helpers
+    ApiTraits/        # ApiResponse, API response traits per controller
     Controllers/      # Auth, User, Cat, Basket, Order, Transaction controllers
     Requests/         # Form Requests (validation + query params)
     Resources/        # JSON:API resources (Cat, User, Basket, Order, Transaction, ...)
-    ApiTraits/        # ApiResponse, API response traits per controller
   Models/             # User, Cat, CatImage, Basket, Order, OrderDetail, Transaction
 bootstrap/app.php     # route/exception wiring
 config/               # sanctum, nusantara, api config

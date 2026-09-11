@@ -12,15 +12,13 @@ class UserResource extends JsonApiResource
      */
     public function toAttributes(Request $request): array
     {
-        $isAdmin = $request->user()?->isAdmin();
-
         return [
             'username' => $this->resource->username,
             'email' => $this->resource->email,
             'phone' => $this->resource->phone,
-            'is_admin' => $this->when($isAdmin, $this->resource->is_admin),
-            'created_at' => $this->when($isAdmin, $this->resource->created_at),
-            'updated_at' => $this->when($isAdmin, $this->resource->updated_at),
+            'is_admin' => (bool) $this->resource->is_admin,
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
         ];
     }
 

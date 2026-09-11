@@ -44,7 +44,7 @@ class BasketController extends Controller
         $alreadyInBasket = $user->baskets()->where('cat_id', $catId)->exists();
 
         if ($alreadyInBasket) {
-            return $this->basketCreateFailedResponse($catId);
+            return $this->basketCreateFailedResponse($catId, 'already in basket');
         }
 
         DB::transaction(function () use ($user, $catId) {
@@ -73,6 +73,42 @@ class BasketController extends Controller
         }
 
         return $this->basketUserIndexSuccessResponse($basket->toResource());
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(CreateBasketRequest $request, int $id): JsonResponse
+    {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return $this->basketInvalidResponse($request->validator->errors());
+        }
+
+        $basket = Basket::find($id);
+
+        if (! $basket) {
+            return $this->basketNotFoundResponse();
+        }
+
+        if (! $request->user()->isAdmin() && $basket->user_id !== $request->user()->id) {
+            return $this->forbiddenResponse();
+        }
+
+        $newCatId = $request->safe()->integer('cat_id');
+
+        $ownerId = $request->user()->isAdmin() ? $basket->user_id : $request->user()->id;
+
+        $alreadyInBasket = Basket::where('user_id', $ownerId)->where('cat_id', $newCatId)->where('id', '!=', $id)->exists();
+
+        if ($alreadyInBasket) {
+            return $this->basketCreateFailedResponse($newCatId, 'already in basket');
+        }
+
+        DB::transaction(function () use ($basket, $newCatId) {
+            $basket->update(['cat_id' => $newCatId]);
+        });
+
+        return $this->basketUpdateSuccessResponse($newCatId);
     }
 
     /**

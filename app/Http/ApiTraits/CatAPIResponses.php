@@ -30,7 +30,7 @@ trait CatAPIResponses
 
     private function catDestroySuccessResponse(): JsonResponse
     {
-        return $this->generalResponse(true, 'deleted cat', 200);
+        return $this->generalResponse(true, 'deleted cat', 204);
     }
 
     private function catNotFoundResponse(): JsonResponse
@@ -40,6 +40,6 @@ trait CatAPIResponses
 
     private function catInvalidResponse(mixed $errors): JsonResponse
     {
-        return $this->generalResponse(false, 'invalid field(s)', 400, $errors);
+        return $this->generalResponse(false, 'invalid field(s)', 422, $errors);
     }
 }

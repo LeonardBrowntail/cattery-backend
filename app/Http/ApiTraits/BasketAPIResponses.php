@@ -20,17 +20,22 @@ trait BasketAPIResponses
 
     protected function basketCreateSuccessResponse(int $catId): JsonResponse
     {
-        return $this->generalResponse(true, "Successfully added cat (id:{$catId}) into basket.", 200);
+        return $this->generalResponse(true, "Successfully added cat (id:{$catId}) into basket.", 201);
     }
 
-    protected function basketCreateFailedResponse(int $catId): JsonResponse
+    protected function basketUpdateSuccessResponse(int $catId): JsonResponse
     {
-        return $this->generalResponse(false, "Unable to add cat (id:{$catId}) into basket.", 422);
+        return $this->generalResponse(true, "Successfully updated basket with cat (id:{$catId}).", 200);
+    }
+
+    protected function basketCreateFailedResponse(int $catId, string $reason = 'already in basket'): JsonResponse
+    {
+        return $this->generalResponse(false, "Unable to add cat (id:{$catId}) into basket.", 422, ['cat_id' => ["Cat (id:{$catId}) is {$reason}."]]);
     }
 
     protected function basketInvalidResponse(mixed $error): JsonResponse
     {
-        return $this->generalResponse(false, 'Invalid field(s).', 400, $error);
+        return $this->generalResponse(false, 'Invalid field(s).', 422, $error);
     }
 
     protected function basketNotFoundResponse(): JsonResponse
@@ -40,6 +45,6 @@ trait BasketAPIResponses
 
     protected function basketDestroySuccessResponse(): JsonResponse
     {
-        return $this->generalResponse(true, 'deleted basket entry', 200);
+        return $this->generalResponse(true, 'deleted basket entry', 204);
     }
 }

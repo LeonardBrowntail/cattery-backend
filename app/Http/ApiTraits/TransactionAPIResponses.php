@@ -25,7 +25,7 @@ trait TransactionAPIResponses
 
     private function transactionDestroySuccessResponse(): JsonResponse
     {
-        return $this->generalResponse(true, 'deleted transaction entry', 200);
+        return $this->generalResponse(true, 'deleted transaction entry', 204);
     }
 
     private function transactionNotFoundResponse(): JsonResponse

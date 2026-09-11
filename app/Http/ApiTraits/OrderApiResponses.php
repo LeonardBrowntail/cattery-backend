@@ -30,7 +30,7 @@ trait OrderAPIResponses
 
     private function orderDestroySuccessResponse(): JsonResponse
     {
-        return $this->generalResponse(true, 'deleted order entry', 200);
+        return $this->generalResponse(true, 'deleted order entry', 204);
     }
 
     private function orderNotFoundResponse(): JsonResponse
@@ -45,6 +45,6 @@ trait OrderAPIResponses
 
     private function orderUpdateInvalidResponse(mixed $errors): JsonResponse
     {
-        return $this->generalResponse(false, 'invalid field(s)', 400, $errors);
+        return $this->generalResponse(false, 'invalid field(s)', 422, $errors);
     }
 }

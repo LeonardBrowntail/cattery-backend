@@ -25,17 +25,17 @@ trait AuthAPIResponses
 
     private function registerInvalidResponse(mixed $errors): JsonResponse
     {
-        return $this->generalResponse(false, 'invalid registration form', 400, $errors);
+        return $this->generalResponse(false, 'invalid registration form', 422, $errors);
     }
 
     private function loginInvalidResponse(mixed $errors): JsonResponse
     {
-        return $this->generalResponse(false, 'invalid login form', 400, $errors);
+        return $this->generalResponse(false, 'invalid login form', 422, $errors);
     }
 
     private function loginFailedResponse(): JsonResponse
     {
-        return $this->generalResponse(false, 'login failed, email or password invalid', 400);
+        return $this->generalResponse(false, 'login failed, email or password invalid', 401);
     }
 
     private function logoutFailedResponse(string $errors): JsonResponse

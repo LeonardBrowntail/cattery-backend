@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\ApiTraits\UserAPIResponses;
+use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -29,6 +31,27 @@ class UserController extends Controller
             ->withQueryString();
 
         return $this->userIndexSuccessResponse($users->toResourceCollection());
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(RegisterRequest $request): JsonResponse
+    {
+        if (isset($request->validator) && $request->validator->fails()) {
+            return $this->userCreateInvalidResponse($request->validator->errors());
+        }
+
+        $valid = $request->validated();
+        $valid['password'] = Hash::make($valid['password']);
+
+        $user = User::create($valid);
+
+        if ($request->user()->isAdmin()) {
+            $user->forceFill(['is_admin' => $request->boolean('is_admin')])->save();
+        }
+
+        return $this->userCreateSuccessResponse($user->toResource());
     }
 
     /**

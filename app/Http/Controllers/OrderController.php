@@ -124,6 +124,15 @@ class OrderController extends Controller
 
         $status = $request->validated('status');
 
+        $allowedTransitions = [
+            'pending' => ['sending', 'cancelled'],
+            'sending' => ['complete'],
+        ];
+
+        if (! isset($allowedTransitions[$order->status]) || ! in_array($status, $allowedTransitions[$order->status], true)) {
+            return $this->orderUpdateInvalidResponse(['status' => ['Cannot transition from "'.$order->status.'" to "'.$status.'".']]);
+        }
+
         if ($status === 'cancelled') {
             if ($order->transaction()->exists()) {
                 return $this->orderUpdateInvalidResponse(['status' => ['Cannot cancel an order that already has a recorded transaction.']]);
